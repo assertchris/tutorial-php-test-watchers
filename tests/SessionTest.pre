@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Tests;
+
+use App\Session;
+use PHPUnit\Framework\TestCase;
+
+class SessionTest extends TestCase
+{
+    public function testClosureIsDecorated()
+    {
+        $user = ["id" => 1];
+        $session = new Session($user);
+
+        $expected = null;
+
+        $closure = ($user) => {
+            $expected = "user: " . $user["id"];
+        };
+
+        $closureWithUser = $session
+            ->closureWithUser($closure);
+
+        $closureWithUser();
+
+        $this->assertEquals("user: 1", $expected);
+    }
+}

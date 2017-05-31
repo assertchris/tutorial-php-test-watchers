@@ -1,0 +1,7 @@
+cover
+vendor
+pre.paths
+example.php
+src/**/*.php
+tests/**/*.php
+scripts/*.php

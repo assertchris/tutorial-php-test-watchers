@@ -1,0 +1,54 @@
+#!/usr/bin/env php
+<?php
+
+putenv("APP_REBUILD=1");
+require_once __DIR__ . "/../tests/bootstrap.php";
+
+use Symfony\Component\Finder\Finder;
+use Yosymfony\ResourceWatcher\ResourceWatcher;
+use Yosymfony\ResourceWatcher\ResourceCacheFile;
+
+$finder = new Finder();
+
+$finder->files()
+    ->name("*.pre")
+    ->in([
+        __DIR__ . "/../src",
+        __DIR__ . "/../tests",
+    ]);
+
+$cache = new ResourceCacheFile(
+    __DIR__ . "/.test-changes.php"
+);
+
+$watcher = new ResourceWatcher($cache);
+$watcher->setFinder($finder);
+
+while (true) {
+    $watcher->findChanges();
+
+    if ($watcher->hasChanges()) {
+        $resources = array_merge(
+            $watcher->getNewResources(),
+            $watcher->getDeletedResources(),
+            $watcher->getUpdatedResources()
+        );
+
+        foreach ($resources as $resource) {
+            $pre = realpath($resource);
+            $php = preg_replace("/pre$/", "php", $pre);
+
+            print "Rebuilding {$pre}" . PHP_EOL;
+
+            Pre\Plugin\compile($pre, $php, true, true);
+        }
+
+        if (empty(getenv("APP_COVER"))) {
+            passthru("APP_REBUILD=0 composer run test");
+        } else {
+            passthru("APP_REBUILD=0 composer run test:cover");
+        }
+    }
+
+    usleep(100000);
+}

@@ -1,0 +1,13 @@
+<?php
+
+require_once __DIR__ . "/vendor/autoload.php";
+
+$user = ["id" => 1];
+$session = new App\Session($user);
+
+$closure = ($user) => {
+    print "user: " . $user["id"] . PHP_EOL;
+};
+
+$closureWithUser = $session->closureWithUser($closure);
+$closureWithUser();

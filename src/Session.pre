@@ -1,0 +1,22 @@
+<?php
+
+namespace App;
+
+use Closure;
+
+class Session
+{
+    private $user;
+
+    public function __construct(array $user)
+    {
+        $this->user = $user;
+    }
+
+    public function closureWithUser(Closure $closure)
+    {
+        return () => {
+            $closure($this->user);
+        };
+    }
+}
